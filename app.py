@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request
 import os
 
-app = Flask(__name__, template_folder="templates", static_folder="static")
+app = Flask(__name__, template_folder='templates', static_folder='static')
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -27,7 +27,6 @@ def index():
             balance = round(exp["amount"] - per_person, 2)
             balances.append({"name": exp["name"], "balance": balance})
 
-        # Prepare settlements
         debtors = sorted([b for b in balances if b["balance"] < 0], key=lambda x: x["balance"])
         creditors = sorted([b for b in balances if b["balance"] > 0], key=lambda x: -x["balance"])
 
@@ -67,4 +66,4 @@ def index():
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=True)
+    app.run(host="0.0.0.0", port=port)
