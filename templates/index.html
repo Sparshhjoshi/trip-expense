@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Trip Expense Splitter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            font-weight: 300;
+            position: relative;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 2px;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .expense-item {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .expense-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .expense-item input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .expense-item input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .expense-item input::placeholder {
+            color: #95a5a6;
+            font-style: italic;
+        }
+
+        .remove-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+
+        .remove-btn:hover {
+            background: #c0392b;
+            transform: scale(1.1);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #ecf0f1;
+            color: #2c3e50;
+            border: 2px solid #bdc3c7;
+        }
+
+        .btn-secondary:hover {
+            background: #d5dbdb;
+            border-color: #95a5a6;
+        }
+
+        .results {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .results h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            font-weight: 400;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .summary-card h3 {
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .summary-card .amount {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .balances-list {
+            list-style: none;
+            margin-bottom: 25px;
+        }
+
+        .balance-item {
+            background: #f8f9fa;
+            margin-bottom: 10px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s ease;
+        }
+
+        .balance-item:hover {
+            transform: translateX(5px);
+        }
+
+        .balance-item.positive {
+            border-left-color: #27ae60;
+            background: #d5f4e6;
+        }
+
+        .balance-item.negative {
+            border-left-color: #e74c3c;
+            background: #fadbd8;
+        }
+
+        .balance-item.neutral {
+            border-left-color: #f39c12;
+            background: #fef9e7;
+        }
+
+        .settlement-table {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .settlement-table th {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .settlement-table td {
+            padding: 12px 15px;
+            text-align: center;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .settlement-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .settlement-table tr:hover {
+            background: #e3f2fd;
+        }
+
+        .no-settlements {
+            text-align: center;
+            color: #27ae60;
+            font-size: 1.2rem;
+            padding: 30px;
+            background: #d5f4e6;
+            border-radius: 8px;
+            border: 2px dashed #27ae60;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                padding: 20px;
+            }
+
+            .expense-item {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .expense-item input {
+                width: 100%;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .summary-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✈️ Trip Expense Splitter</h1>
+        
+        <div class="form-section">
+            <div id="expenses">
+                <div class="expense-item">
+                    <input type="text" class="name-input" placeholder="Name" required />
+                    <input type="number" class="amount-input" placeholder="Amount ₹" step="0.01" required />
+                    <button type="button" class="remove-btn" onclick="removeExpense(this)" style="display: none;">×</button>
+                </div>
+            </div>
+            
+            <div class="btn-group">
+                <button type="button" class="btn btn-secondary" onclick="addExpense()">+ Add Another Person</button>
+                <button type="button" class="btn btn-primary" onclick="calculateExpenses()">Calculate Split</button>
+                <button type="button" class="btn btn-secondary" onclick="clearAll()">Clear All</button>
+            </div>
+        </div>
+
+        <div id="results" class="results" style="display: none;"></div>
+    </div>
+
+    <script>
+        let expenseData = [];
+
+        function addExpense() {
+            const container = document.getElementById("expenses");
+            const div = document.createElement("div");
+            div.classList.add("expense-item", "fade-in");
+            div.innerHTML = `
+                <input type="text" class="name-input" placeholder="Name" required />
+                <input type="number" class="amount-input" placeholder="Amount ₹" step="0.01" required />
+                <button type="button" class="remove-btn" onclick="removeExpense(this)">×</button>
+            `;
+            container.appendChild(div);
+            updateRemoveButtons();
+        }
+
+        function removeExpense(button) {
+            const expenseItem = button.parentElement;
+            expenseItem.style.animation = 'fadeOut 0.3s ease-out';
+            setTimeout(() => {
+                expenseItem.remove();
+                updateRemoveButtons();
+            }, 300);
+        }
+
+        function updateRemoveButtons() {
+            const removeButtons = document.querySelectorAll('.remove-btn');
+            const expenseItems = document.querySelectorAll('.expense-item');
+            
+            removeButtons.forEach((btn, index) => {
+                btn.style.display = expenseItems.length > 1 ? 'flex' : 'none';
+            });
+        }
+
+        function clearAll() {
+            const container = document.getElementById("expenses");
+            container.innerHTML = `
+                <div class="expense-item">
+                    <input type="text" class="name-input" placeholder="Name" required />
+                    <input type="number" class="amount-input" placeholder="Amount ₹" step="0.01" required />
+                    <button type="button" class="remove-btn" onclick="removeExpense(this)" style="display: none;">×</button>
+                </div>
+            `;
+            document.getElementById("results").style.display = "none";
+            expenseData = [];
+        }
+
+        function calculateExpenses() {
+            const names = document.querySelectorAll('.name-input');
+            const amounts = document.querySelectorAll('.amount-input');
+            
+            expenseData = [];
+            let total = 0;
+            let hasError = false;
+
+            // Collect and validate data
+            for (let i = 0; i < names.length; i++) {
+                const name = names[i].value.trim();
+                const amount = parseFloat(amounts[i].value) || 0;
+                
+                if (!name) {
+                    names[i].focus();
+                    names[i].style.borderColor = '#e74c3c';
+                    setTimeout(() => names[i].style.borderColor = '#e1e8ed', 3000);
+                    hasError = true;
+                    break;
+                }
+                
+                expenseData.push({ name, amount });
+                total += amount;
+            }
+
+            if (hasError || expenseData.length === 0) return;
+
+            const perPerson = total / expenseData.length;
+            const balances = expenseData.map(person => ({
+                name: person.name,
+                balance: person.amount - perPerson
+            }));
+
+            // Calculate settlements
+            const settlements = calculateSettlements(balances);
+            
+            displayResults(total, perPerson, balances, settlements);
+        }
+
+        function calculateSettlements(balances) {
+            const settlements = [];
+            const creditors = balances.filter(b => b.balance > 0.01).sort((a, b) => b.balance - a.balance);
+            const debtors = balances.filter(b => b.balance < -0.01).sort((a, b) => a.balance - b.balance);
+            
+            let i = 0, j = 0;
+            
+            while (i < creditors.length && j < debtors.length) {
+                const creditor = creditors[i];
+                const debtor = debtors[j];
+                const amount = Math.min(creditor.balance, Math.abs(debtor.balance));
+                
+                if (amount > 0.01) {
+                    settlements.push({
+                        from: debtor.name,
+                        to: creditor.name,
+                        amount: amount.toFixed(2)
+                    });
+                    
+                    creditor.balance -= amount;
+                    debtor.balance += amount;
+                }
+                
+                if (Math.abs(creditor.balance) < 0.01) i++;
+                if (Math.abs(debtor.balance) < 0.01) j++;
+            }
+            
+            return settlements;
+        }
+
+        function displayResults(total, perPerson, balances, settlements) {
+            const resultsDiv = document.getElementById("results");
+            
+            let balancesHtml = balances.map(balance => {
+                let className = 'neutral';
+                let message = 'All settled';
+                
+                if (balance.balance > 0.01) {
+                    className = 'positive';
+                    message = `Should receive ₹${Math.abs(balance.balance).toFixed(2)}`;
+                } else if (balance.balance < -0.01) {
+                    className = 'negative';
+                    message = `Should pay ₹${Math.abs(balance.balance).toFixed(2)}`;
+                }
+                
+                return `<li class="balance-item ${className}">
+                    <span><strong>${balance.name}</strong></span>
+                    <span>${message}</span>
+                </li>`;
+            }).join('');
+
+            let settlementsHtml = '';
+            if (settlements.length > 0) {
+                settlementsHtml = `
+                    <h2>💰 Settlement Table</h2>
+                    <table class="settlement-table">
+                        <thead>
+                            <tr>
+                                <th>From</th>
+                                <th>To</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${settlements.map(s => `
+                                <tr>
+                                    <td>${s.from}</td>
+                                    <td>${s.to}</td>
+                                    <td>₹${s.amount}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } else {
+                settlementsHtml = `
+                    <div class="no-settlements">
+                        🎉 Everyone is settled! All balanced!
+                    </div>
+                `;
+            }
+
+            resultsDiv.innerHTML = `
+                <h2>📊 Results</h2>
+                <div class="summary-cards">
+                    <div class="summary-card">
+                        <h3>Total Budget</h3>
+                        <div class="amount">₹${total.toFixed(2)}</div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Per Person Share</h3>
+                        <div class="amount">₹${perPerson.toFixed(2)}</div>
+                    </div>
+                </div>
+                
+                <h2>⚖️ Individual Balances</h2>
+                <ul class="balances-list">
+                    ${balancesHtml}
+                </ul>
+                
+                ${settlementsHtml}
+            `;
+            
+            resultsDiv.style.display = "block";
+            resultsDiv.classList.add("fade-in");
+            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF();
+            
+            // Add title
+            pdf.setFontSize(20);
+            pdf.setFont(undefined, 'bold');
+            pdf.text('Trip Expense Splitter - Results', 105, 20, { align: 'center' });
+            
+            // Add date
+            pdf.setFontSize(10);
+            pdf.setFont(undefined, 'normal');
+            const date = new Date().toLocaleDateString();
+            pdf.text(`Generated on: ${date}`, 105, 30, { align: 'center' });
+            
+            let yPosition = 50;
+            
+            // Calculate totals
+            const total = expenseData.reduce((sum, person) => sum + person.amount, 0);
+            const perPerson = total / expenseData.length;
+            
+            // Add summary section
+            pdf.setFontSize(14);
+            pdf.setFont(undefined, 'bold');
+            pdf.text('Summary', 20, yPosition);
+            yPosition += 15;
+            
+            pdf.setFontSize(11);
+            pdf.setFont(undefined, 'normal');
+            pdf.text(`Total Budget: ₹${total.toFixed(2)}`, 20, yPosition);
+            yPosition += 8;
+            pdf.text(`Per Person Share: ₹${perPerson.toFixed(2)}`, 20, yPosition);
+            yPosition += 20;
+            
+            // Add individual expenses section
+            pdf.setFontSize(14);
+            pdf.setFont(undefined, 'bold');
+            pdf.text('Individual Expenses', 20, yPosition);
+            yPosition += 15;
+            
+            pdf.setFontSize(11);
+            pdf.setFont(undefined, 'normal');
+            expenseData.forEach(person => {
+                pdf.text(`${person.name}: ₹${person.amount.toFixed(2)}`, 20, yPosition);
+                yPosition += 8;
+            });
+            yPosition += 10;
+            
+            // Add balance section
+            pdf.setFontSize(14);
+            pdf.setFont(undefined, 'bold');
+            pdf.text('Individual Balances', 20, yPosition);
+            yPosition += 15;
+            
+            pdf.setFontSize(11);
+            pdf.setFont(undefined, 'normal');
+            const balances = expenseData.map(person => ({
+                name: person.name,
+                balance: person.amount - perPerson
+            }));
+            
+            balances.forEach(balance => {
+                let message = 'All settled';
+                if (balance.balance > 0.01) {
+                    message = `Should receive ₹${Math.abs(balance.balance).toFixed(2)}`;
+                } else if (balance.balance < -0.01) {
+                    message = `Should pay ₹${Math.abs(balance.balance).toFixed(2)}`;
+                }
+                pdf.text(`${balance.name}: ${message}`, 20, yPosition);
+                yPosition += 8;
+            });
+            yPosition += 10;
+            
+            // Add settlement table
+            const settlements = calculateSettlements(balances);
+            if (settlements.length > 0) {
+                pdf.setFontSize(14);
+                pdf.setFont(undefined, 'bold');
+                pdf.text('Settlement Transactions', 20, yPosition);
+                yPosition += 15;
+                
+                // Table headers
+                pdf.setFontSize(11);
+                pdf.setFont(undefined, 'bold');
+                pdf.text('From', 20, yPosition);
+                pdf.text('To', 80, yPosition);
+                pdf.text('Amount', 140, yPosition);
+                yPosition += 10;
+                
+                // Draw line under headers
+                pdf.line(20, yPosition - 2, 180, yPosition - 2);
+                yPosition += 5;
+                
+                // Table rows
+                pdf.setFont(undefined, 'normal');
+                settlements.forEach(settlement => {
+                    if (yPosition > 280) { // Add new page if needed
+                        pdf.addPage();
+                        yPosition = 20;
+                    }
+                    pdf.text(settlement.from, 20, yPosition);
+                    pdf.text(settlement.to, 80, yPosition);
+                    pdf.text(`₹${settlement.amount}`, 140, yPosition);
+                    yPosition += 8;
+                });
+            } else {
+                pdf.setFontSize(14);
+                pdf.setFont(undefined, 'bold');
+                pdf.text('Settlement Status', 20, yPosition);
+                yPosition += 15;
+                
+                pdf.setFontSize(11);
+                pdf.setFont(undefined, 'normal');
+                pdf.text('🎉 Everyone is settled! All balanced!', 20, yPosition);
+            }
+            
+            // Save the PDF
+            const fileName = `trip-expenses-${new Date().toISOString().split('T')[0]}.pdf`;
+            pdf.save(fileName);
+        }
+
+        // Add CSS animation for fade out
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeOut {
+                from { opacity: 1; transform: translateY(0); }
+                to { opacity: 0; transform: translateY(-20px); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Initialize
+        updateRemoveButtons();
+    </script>
+    <footer style="border: #2c3e50 solid ; border-radius: 10px; text-align: center; padding: 10px; margin: 20px;"><h6>Thanks for using it | sparsh joshi</h6></footer>
+</body>
+</html>
